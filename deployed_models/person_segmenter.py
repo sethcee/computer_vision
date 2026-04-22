@@ -28,25 +28,29 @@ def generate_mask(uploaded_image) :
             "data": uploaded_image_b64_string
         }
 
-    response = requests.post(url, json = payload)
-    mask_b64 = response.json().get("mask")
-    mask_bytes = base64.b64decode(mask_b64)
-    mask_image = Image.open(io.BytesIO(mask_bytes))
+    try :
+        response = requests.post(url, json = payload)
+        mask_b64 = response.json().get("mask")
+        mask_bytes = base64.b64decode(mask_b64)
+        mask_image = Image.open(io.BytesIO(mask_bytes))
 
-    # segment image
-    img_uint8 = (image_tensor_for_display * 255).to(torch.uint8)
-    bool_mask = F.to_tensor(mask_image).bool()
-    segmented_image = F.to_pil_image(draw_segmentation_masks(img_uint8, bool_mask, alpha = 0.40, colors = "blue"))
+        # segment image
+        img_uint8 = (image_tensor_for_display * 255).to(torch.uint8)
+        bool_mask = F.to_tensor(mask_image).bool()
+        segmented_image = F.to_pil_image(draw_segmentation_masks(img_uint8, bool_mask, alpha = 0.40, colors = "blue"))
 
 
-    # apply elastic
-    elastic_transformer = v2.ElasticTransform(alpha = 1000.0)
-    watery_image = elastic_transformer(image_tensor_for_display)
-    watery_uint8 = (watery_image * 255).to(torch.uint8)
-    watery = torch.where(bool_mask, img_uint8, watery_uint8)
-    watery_image = F.to_pil_image(watery)
+        # apply elastic
+        elastic_transformer = v2.ElasticTransform(alpha = 1000.0)
+        watery_image = elastic_transformer(image_tensor_for_display)
+        watery_uint8 = (watery_image * 255).to(torch.uint8)
+        watery = torch.where(bool_mask, img_uint8, watery_uint8)
+        watery_image = F.to_pil_image(watery)
 
-    return segmented_image, watery_image
+        return segmented_image, watery_image
+    
+    except :
+        return uploaded_image, uploaded_image
 
 
 
