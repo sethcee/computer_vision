@@ -48,14 +48,12 @@ class ResidualUNet(nn.Module) :
         decoder_in_channels = self.up_layer3[0].out_channels + self.down_layer0[0].out_channels
         decoder_out_channels = decoder_in_channels // 2
         self.decoder = nn.Sequential(
-            nn.Conv2d(in_channels = decoder_in_channels, out_channels = decoder_out_channels, kernel_size = 3),
+            nn.Conv2d(in_channels = decoder_in_channels, out_channels = decoder_out_channels, kernel_size = 3, padding = 1),
             nn.BatchNorm2d(decoder_out_channels),
             nn.ReLU(),
-            nn.Conv2d(in_channels = decoder_out_channels, out_channels = self.num_classes, kernel_size = 3),
-            nn.BatchNorm2d(self.num_classes),
-            nn.ReLU(),
-            nn.Conv2d(in_channels = self.num_classes, out_channels = self.num_classes, kernel_size = 1)
+            nn.Conv2d(in_channels = decoder_out_channels, out_channels = self.num_classes, kernel_size = 1, padding = 1)
         )
+        
 
     def _create_upsample_block(self,in_channels, out_channels, kernel_size = 3, stride = 1, padding = 1) :
         upsample_layer = nn.Sequential(
@@ -90,6 +88,9 @@ class ResidualUNet(nn.Module) :
         up_layer3_output = self.up_layer3(up_layer3_input)
 
         decoder_input = self._concatenate_inputs(up_layer3_output, down_layer0_output)
-        logits_map = self.decoder(decoder_input)
+        decoder_output = self.decoder(decoder_input)
+
+        logits_map = F.interpolate(decoder_output, size = x.shape[2:], mode = 'bilinear', align_corners = True)
+
 
         return logits_map
