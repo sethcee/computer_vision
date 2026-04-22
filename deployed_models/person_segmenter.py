@@ -19,6 +19,7 @@ def generate_mask(uploaded_image) :
     # image
     image_tensor_for_display = F.resize(F.to_tensor(uploaded_image), size = (512, 512), antialias = True)
     uploaded_image = image_tensor_for_display
+    uploaded_image = F.to_pil_image(uploaded_image)
 
     # convert to base64 to send. PNG is lossless. JPEG is not.
     buffered = io.BytesIO()
