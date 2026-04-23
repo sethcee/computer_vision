@@ -59,7 +59,7 @@ def generate_mask(uploaded_image) :
 # configure the application layout
 st.set_page_config(page_title = "Person Segmenter and Background Filter", layout = "centered")
 st.title("Person Segmenter and Background Filter")
-st.write("Upload an image and press filter. If people are present in the image they will be semantically segmented using a UNet with a ResNet18 backbone" \
+st.write("Upload an image and press segment. If people are present in the image they will be semantically segmented using a UNet with a ResNet18 backbone" \
 " and the background will be filtered.")
 column1, column2, column3, column4 = st.columns((1,1,1, 1))
 uploaded_file = None
